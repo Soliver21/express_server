@@ -1,5 +1,5 @@
 import express from "express"
-import { createUser, getUsers } from "./model.js";
+import { createUser, getUsers, modifiedUser, removeUser } from "./model.js";
 import { error } from "console";
 
 export const getAll = async(req :express.Request, res :express.Response) => {
@@ -17,12 +17,26 @@ export const addUser = async(req :express.Request, res :express.Response) => {
 
         const user = await createUser(newUser);
         res.status(201).type("application/json").send(user);
-    }catch{
-        res.status(400).type("application/json").send({error: "Client error"})
+    }catch(error){
+        res.status(500).type("application/json").send({error: "Client error"})
     }
 }
 
 export const deleteUser = async (req :express.Request, res :express.Response) => {
     const id = parseInt(req.params.id!);
-    if (id === 3) res.status(200).type("application/json").send({message: "successful"});
+    const result = await removeUser(id);
+
+    if (result) res.status(200).type("application/json").send({error: "Removed succesfully"});
+    else res.status(500).type("application/json").send({error: "Failed to remove"});
+}
+
+export const updateUser = async (req :express.Request, res :express.Response) => {
+    const updateUser = req.body;
+    const id = req.params.id!;
+    try{
+        const user = await modifiedUser(id, updateUser);
+        res.status(201).type("application/json").send(user);
+    }catch(error){
+        res.status(400).type("application/json").send({error: "Client error, User was not modified."})
+    }
 }
