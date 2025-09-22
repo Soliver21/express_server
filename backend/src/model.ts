@@ -47,6 +47,8 @@ export const modifiedUser = async (id: number, user: Partial<User>) => {
     if (rows.length > 0) {
         currentUser = rows[0];
         console.log(currentUser, typeof currentUser);
+    }else{
+        return false;
     }
     const updatedUser = {
         id : id,
