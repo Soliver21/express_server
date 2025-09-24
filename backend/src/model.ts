@@ -61,18 +61,18 @@ export const modifiedUser = async (id: number, user: Partial<User>) => {
     return result.affectedRows > 0;
 }
 export const modifiedFullUser = async (id: number, user: User) => {
-    let currentUser;
-    const [rows] = await pool.query<mysql.RowDataPacket[]>("SELECT * FROM users WHERE id = ?", [id]);
-    if (rows.length > 0) {
-        currentUser = rows[0];
+    let [result] = await pool.query<mysql.ResultSetHeader>("UPDATE users SET nev = ?, cim = ?, szuletesiDatum = ? WHERE id = ?",[user.nev,user.cim,user.szuletesiDatum, id]);
+    if (result.affectedRows === 0){
+        [result] = await pool.query<mysql.ResultSetHeader>("INSERT INTO users (nev, cim, szuletesiDatum) VALUES (?,?,?)",[user.nev, user.cim, user.szuletesiDatum]);
+        return {...user, id: result.insertId};
+    }else return {...user, id: id}
+}
+export const findUsersBySearch = async(search : string) => {
+    if (!search) {
+        const [rows] = await pool.query<mysql.RowDataPacket[]>("SELECT * FROM users");
+        return rows;
+    }else{
+        const [rows] = await pool.query<mysql.RowDataPacket[]>("SELECT * FROM users WHERE cim LIKE ?", [`%${search}%`]);
+        return rows;
     }
-    const updatedUser = {
-        id : id,
-        nev : user.nev ?? currentUser!.nev,
-        cim: user.cim ?? currentUser!.cim,
-        szuletesiDatum : user.szuletesiDatum ?? currentUser!.szuletesiDatum 
-    }
-    const [result] = await pool.query<mysql.ResultSetHeader>("UPDATE users SET nev = ?, cim = ?, szuletesiDatum = ? WHERE id = ?", [updatedUser.nev, updatedUser.cim, updatedUser.szuletesiDatum, id]);
-    // ????
-    return result.affectedRows > 0;
 }

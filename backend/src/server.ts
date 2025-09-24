@@ -17,7 +17,7 @@ const staticFilesDir = path.join(__dirname, "..", "dist");
 
 // Cors problémákra - Csak fejlesztési időben: minden kérést engedélyezünk.
 server.use(cors());
-server.use(express.json());
+server.use(express.json()); //A requestben lévő json js object-té konvertálódjon
 
 // Statikus állományok (a szerver csak küldi ezeket) küldése a kliens felé:
 server.use(express.static(staticFilesDir));

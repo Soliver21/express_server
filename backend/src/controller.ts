@@ -1,5 +1,5 @@
 import express, { response } from 'express';
-import { createUser, getUsers, removeUser, modifiedUser, getOneUser, modifiedFullUser } from './model.js';
+import { createUser, getUsers, removeUser, modifiedUser, getOneUser, modifiedFullUser, findUsersBySearch } from './model.js';
 
 export const getAll = async (req: express.Request, res: express.Response) => {
     try {
@@ -65,9 +65,17 @@ export const updateFullUser = async (req: express.Request, res: express.Response
     const id = parseInt(req.params.id!);
     try{
         const result = await modifiedFullUser(id, updateUser);
-        const response = result ? {message: "Successful operation"} : {message: "Failed operation"}
-        res.status(201).type("application/json").send(response);
+        return res.status(201).type("application/json").send({message : result});
     }catch(error) {
-        res.status(500).type("application/json").send(response);
+        res.status(500).type("application/json").send({message: "Internal server error."});
+    }
+}
+export const searchUser = async(req:express.Request, res: express.Response) => {
+    try{
+        const search = req.query.search ? String(req.query.search) : "";
+        const users = await findUsersBySearch(search);
+        return res.send(users);
+    }catch(error){
+        res.status(500).type("application/json").send({message: "Internal server error."});
     }
 }
